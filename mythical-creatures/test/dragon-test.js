@@ -50,6 +50,17 @@ describe ('Dragon', function() {
       assert.equal(dragon1.temperment, 'aggressive');
       assert.equal(dragon2.temperment, 'gentle');
     });
+
+    it('should start out haven eaten 0 times', function(){
+      const dragon = createDragon('Gray', 'Marley', 'aggressive');
+
+      assert.equal(dragon.timesEaten, 0);
+    });
+
+    it('should start out being hungry', function(){
+      const dragon = createDragon('Gray', 'Marley', 'aggressive');
+      assert.equal(dragon.isHungry, true);
+    });
   });
 
   describe('greetRiders', function(){
@@ -65,51 +76,45 @@ describe ('Dragon', function() {
     });
   });
 
+  describe('eat', function () {
+    it('should be full after eating 3 times', function () {
+      const dragon = createDragon('Gray', 'Marley', 'aggressive');
+      const fedDragon = eat(dragon);
+
+      assert.equal(fedDragon.timesEaten, 1);
+      assert.equal(fedDragon.isHungry, true);
+    });
+
+    it('should be full after eating 3 times', function(){
+      const dragon = createDragon('Gray', 'Marley', 'aggressive');
+      const fedDragon = eat(dragon);
+
+      assert.equal(fedDragon.timesEaten, 1);
+      assert.equal(fedDragon.isHungry, true);
+
+      const fedDragon2 = eat(fedDragon);
+
+      assert.equal(fedDragon2.timesEaten, 2);
+      assert.equal(fedDragon2.isHungry, true);
+
+      const fedDragon3 = eat(fedDragon2);
+
+      assert.equal(fedDragon3.timesEaten, 3);
+      assert.equal(fedDragon3.isHungry, false);
+    });
+  });
+
+  describe('findFireBreathers', function () {
+    it('shoudl be a firebreater if aggressive temperment', function () {
+      const dragon1 = createDragon('Gray', 'Marley', 'aggressive');
+      const dragon2 = createDragon('Sky', 'Susie', 'gentle');
+      const dragon3 = createDragon('Mushu', 'Mulan', 'aggressive');
+      const dragon4 = createDragon('Lady Vox', 'Emily', 'gentle');
+
+      const allDragons = [dragon1, dragon2, dragon3, dragon4]
+      const fireBreathers = findFireBreathers(allDragons);
+
+      assert.deepEqual(fireBreathers, [dragon1, dragon3])
+    });
+  });
 })
-
-
-//   it.skip('should start off having eaten 0 times', function() {
-//     var dragon = createDragon('Mushu', 'Mulan', 'aggressive');
-
-//     assert.equal(dragon.timesEaten, 0);
-//   });
-
-//   it.skip('should start off being hungry', function() {
-//     var dragon = createDragon('Mushu', 'Mulan', 'aggressive');
-
-//     assert.equal(dragon.hungry, true);
-//   });
-
-//   it.skip('should be full after eating 3 times', function() {
-//     var dragon = createDragon('Lady Vox', 'Emily', 'gentle');
-
-//     var fedDragon = eat(dragon);
-
-//     assert.equal(fedDragon.timesEaten, 1);
-//     assert.equal(fedDragon.hungry, true);
-
-//     var doubleFedDragon = eat(fedDragon);
-
-//     assert.equal(doubleFedDragon.timesEaten, 2);
-//     assert.equal(doubleFedDragon.hungry, true);
-
-//     var tripleFedDragon = eat(doubleFedDragon);
-
-//     assert.equal(tripleFedDragon.timesEaten, 3);
-//     assert.equal(tripleFedDragon.hungry, false);
-//   });
-
-//   //Spicy:
-//   it.skip('should be a fireBreather if aggressive in temperment', function() {
-//     var dragon1 = createDragon('Gray', 'Marley', 'aggressive');
-//     var dragon2 = createDragon('Sky', 'Susie', 'gentle');
-//     var dragon3 = createDragon('Mushu', 'Mulan', 'aggressive');
-//     var dragon4 = createDragon('Lady Vox', 'Emily', 'gentle');
-
-//     var allDragons = [dragon1, dragon2, dragon3, dragon4];
-
-//     var fireBreathers = findFireBreathers(allDragons);
-
-//     assert.deepEqual(fireBreathers, [dragon1, dragon3])
-//   });
-// });
