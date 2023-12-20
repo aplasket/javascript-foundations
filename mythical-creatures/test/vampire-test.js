@@ -1,135 +1,128 @@
-var assert = require('chai').assert;
-var {createVampire, drink, findBatLovers, encounterDeliciousVictim, inquirePlace} = require('../exercises/vampire');
+const assert = require('chai').assert;
+const {createVampire, encounterDeliciousVictim, drink, inquirePlace, findBatLovers} = require('../exercises/vampire');
+
 
 describe('Vampire', function() {
+  describe('creatVampire', function() {
+    it('should create a vampire', function() {
+      const vampire = createVampire('Jhunter');
+      assert.equal(vampire.name, 'Jhunter');
+    });
 
-  it.skip('should create a vampire', function() {
-    var vampire = createVampire('Jhun');
+    it('should have a pet bat as default', function() {
+      const vampire = createVampire('Jhunter');
+      assert.equal(vampire.pet, 'bat')
+    });
 
-    assert.equal(vampire.name, 'Jhun');
+    it ('should be able to take an argument for pet', function() {
+      const vampire = createVampire('Michael', 'fox');
+      assert.equal(vampire.pet, 'fox');
+    });
+
+    it('shoudl be thirsty', function() {
+      const vampire = createVampire('Michael', 'fox');
+      assert.equal(vampire.isThirsty, true);
+    });
+
+    it('should start with no ounces blood drank', function() {
+      assert.equal(createVampire('Bobby').ouncesDrank, 0);
+    });
   });
 
-  it.skip('should have a pet bat as a default', function() {
-    var vampire = createVampire('Brittany');
+  describe('encounterDeliciousVictims', function() {
+    it('should shout at victim when thirsty', function() {
+      const vampire = createVampire('TayTay');
+      const expectedResponse = 'I WANT TO SUCK YOUR BLOOD!'
 
-    assert.equal(vampire.name, 'Brittany');
-    assert.equal(vampire.pet, 'bat');
+      const shout = encounterDeliciousVictim(vampire)
+      assert.equal(shout, expectedResponse);
+    });
+
+    it('shoudl refuse blood from a victim when not thirsty', function() {
+      const vampire = createVampire('Javi');
+      const drank1 = drink(vampire);
+      const drank2 = drink(drank1);
+      const drank3 = drink(drank2);
+      const drank4 = drink(drank3);
+      const drank5 = drink(drank4);
+
+      assert.equal(drank5.ouncesDrank, 50);
+      assert.equal(drank5.isThirsty, false);
+
+      const expectedResponse = 'No thanks I\'m too full';
+      const shout = encounterDeliciousVictim(drank5)
+      assert.equal(shout, expectedResponse);
+    });
   });
 
-  it.skip('should be able to take an argument for pet', function() {
-    var vampire = createVampire('Jeff', 'fox');
-    var vampira = createVampire('Esme', 'armadillo');
+  describe('drink', function () {
+    it('should drink 10 ounces of blood at a time', function () {
+      const vampire = createVampire('Ringo');
+      const drank1 = drink(vampire);
+      assert.equal(drank1.ouncesDrank, 10);
 
-    assert.equal(vampire.pet, 'fox');
-    assert.equal(vampira.pet, 'armadillo');
+      const drank2 = drink(drank1);
+      assert.equal(drank2.ouncesDrank, 20);
+
+      const drank3 = drink(drank2);
+      assert.equal(drank3.ouncesDrank, 30);
+    });
+
+    it('should no longer be thirst after drinking 50ounces', function() {
+      const vampire = createVampire('Cruz');
+      const drank1 = drink(vampire);
+      const drank2 = drink(drank1);
+      const drank3 = drink(drank2);
+      const drank4 = drink(drank3);
+      const drank5 = drink(drank4);
+
+      assert.equal(drank5.ouncesDrank, 50);
+      assert.equal(drank5.isThirsty, false);
+    });
+
+    it('should not drink more ounces when not thirsty', function() {
+      const vampire = createVampire('Cruz');
+      const drank1 = drink(vampire);
+      const drank2 = drink(drank1);
+      const drank3 = drink(drank2);
+      const drank4 = drink(drank3);
+      const drank5 = drink(drank4);
+
+      assert.equal(drank5.ouncesDrank, 50);
+      assert.equal(drank5.isThirsty, false);
+
+      const drank6 = drink(drank5);
+      assert.equal(drank6.ouncesDrank, 50);
+      assert.equal(drank6.isThirsty, false);
+    });
   });
 
-  it.skip('should be thirsty', function() {
-    var vampire = createVampire('Andy');
+  describe('inquirePlace', function (){
+    it('should say if its been to a location', function(){
+      const locations = ['Transylvania', 'Washington', 'New Orleans', 'Mystic Falls'];
+      const response = inquirePlace(locations, 'New Orleans');
+      const expectedResponse = "Yes I have spent time in New Orleans";
 
-    assert.equal(vampire.thirsty, true);
+      assert.deepEqual(response, expectedResponse);
+    });
+    it('should say if its NOT been to a location', function(){
+      const locations = ['Transylvania', 'Washington', 'New Orleans', 'Mystic Falls'];
+      const response = inquirePlace(locations, 'North Dakota');
+      const expectedResponse = "No I have never been to North Dakota";
+
+      assert.deepEqual(response, expectedResponse);
+    });
   });
 
-  it.skip('should shout at victim when thirsty', function() {
-    var vampire = createVampire('Andy');
-    var expectedResponse = 'I WANT TO SUCK YOUR BLOOD!'
+  describe('findBatLovers', function(){
+    it('should be able to find vampires with bats', function(){
+      const vampire1 = createVampire('Jhunter');
+      const vampire2 = createVampire('Cruz', 'fox');
+      const vampire3 = createVampire('Suz', 'unicorn');
+      const vampire4 = createVampire('Mike');
 
-    var shout = encounterDeliciousVictim(vampire)
-
-    assert.equal(shout, expectedResponse);
-  });
-
-  it.skip('should start with no ounces of blood drank', function() {
-    assert.equal(createVampire('Bobby').ouncesDrank, 0);
-  });
-
-  it.skip('should drink 10 ounces of blood at a time', function() {
-    var vampire = createVampire('Margot');
-
-    var drankOnceVamp = drink(vampire);
-
-    assert.equal(drankOnceVamp.ouncesDrank, 10);
-
-    var drankTwiceVamp = drink(drankOnceVamp);
-
-    assert.equal(drankTwiceVamp.ouncesDrank, 20);
-
-    var drankThriceVamp = drink(drankTwiceVamp);
-
-    assert.equal(drankThriceVamp.ouncesDrank, 30);
-  });
-
-  it.skip('should no longer be thirsty after drinking 50 ounces', function() {
-    var vampire = createVampire('Javi');
-
-    var drankOnceVamp = drink(vampire);
-    var drankTwiceVamp = drink(drankOnceVamp);
-    var drankThriceVamp = drink(drankTwiceVamp);
-    var drank4xsVamp = drink(drankThriceVamp);
-    var drank5xsVamp = drink(drank4xsVamp);
-
-    assert.equal(drank5xsVamp.ouncesDrank, 50);
-    assert.equal(drank5xsVamp.thirsty, false);
-  });
-
-  it.skip('should not drink more ounces when not thirsty', function() {
-    var vampire = createVampire('Javi');
-
-    var drankOnceVamp = drink(vampire);
-    var drankTwiceVamp = drink(drankOnceVamp);
-    var drankThriceVamp = drink(drankTwiceVamp);
-    var drank4xsVamp = drink(drankThriceVamp);
-    var drank5xsVamp = drink(drank4xsVamp);
-
-    assert.equal(drank5xsVamp.ouncesDrank, 50);
-    assert.equal(drank5xsVamp.thirsty, false);
-
-    var notDrinking6xsVamp = drink(drank5xsVamp);
-
-    assert.equal(notDrinking6xsVamp.ouncesDrank, 50);
-  });
-
-  it.skip('should refuse blood from victim when not thirsty', function() {
-    var vampire = createVampire('Javi');
-
-    var drankOnceVamp = drink(vampire);
-    var drankTwiceVamp = drink(drankOnceVamp);
-    var drankThriceVamp = drink(drankTwiceVamp);
-    var drank4xsVamp = drink(drankThriceVamp);
-    var drank5xsVamp = drink(drank4xsVamp);
-
-    assert.equal(drank5xsVamp.ouncesDrank, 50);
-    assert.equal(drank5xsVamp.thirsty, false);
-
-    assert.equal(encounterDeliciousVictim(drank5xsVamp), `No thanks, I am too full.`);
-  });
-
-  it.skip('should say if its been to a location', function() {
-    var locations = ['Transylvania', 'Washington', 'New Orleans', 'Mystic Falls'];
-
-    var response = inquirePlace(locations, 'New Orleans');
-    var expectedResponse = "Yes, I have spent some time in New Orleans."
-
-    assert.deepEqual(response, expectedResponse);
-  });
-
-  it.skip('should say if its not been to a location', function() {
-    var locations = ['Transylvania', 'Washington', 'New Orleans', 'Mystic Falls'];
-
-    var response = inquirePlace(locations, 'Idaho');
-    var expectedResponse = "No, I have never been to Idaho."
-
-    assert.deepEqual(response, expectedResponse);
-  });
-
-  it.skip('should be able to find the vampires with bats', function() {
-    var javi = createVampire('Javi');
-    var brittany = createVampire('Brittany');
-    var jeff = createVampire('Jeff', 'fox');
-    var david = createVampire('David', 'armadillo');
-
-    var batLovers = findBatLovers([javi, brittany, jeff, david]);
-
-    assert.deepEqual(batLovers, ['Javi', 'Brittany']);
+      const batLovers = findBatLovers([vampire1, vampire2, vampire3, vampire4])
+      assert.deepEqual(batLovers, [vampire1,vampire4]);
+    });
   });
 });
