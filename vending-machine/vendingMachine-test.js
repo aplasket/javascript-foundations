@@ -106,7 +106,7 @@ describe('VendingMachine', function () {
       const selectedItem = {name: 'chips', quantity: 2}
       const moneyForPurchase = 3.75;
       const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase);
-      const expectedResult = `Here are your ${selectedItem.name}`;
+      const expectedResult = 'Delievered: chips, quantity: 2. Your change is: 0.25';
 
       assert.equal(transaction, expectedResult);
     });
@@ -142,7 +142,7 @@ describe('VendingMachine', function () {
       assert.equal(stockedItem.quantity, 3);
 
       const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase);
-      const expectedResult = `Here are your ${selectedItem.name}`;
+      const expectedResult = 'Delievered: skittles, quantity: 1. Your change is: 0.00';
 
       assert.equal(stockedItem.quantity, 2);
       assert.equal(transaction, expectedResult);
@@ -165,14 +165,11 @@ describe('VendingMachine', function () {
       const stockedItem = vendMach.inventory.find(obj => obj.name === selectedItem.name);
       const totalCost = stockedItem.price * selectedItem.quantity;
 
-      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase);
       const change = collectChange(totalCost, moneyForPurchase);
+      const expectedChangeResult = (moneyForPurchase - totalCost).toFixed(2);
 
-      const expectedTransResult = `Here are your ${selectedItem.name}`;
-      const expectedChangeResult = `Your change equals: ${(moneyForPurchase - totalCost).toFixed(2)}`;
-
-      assert.equal(transaction, expectedTransResult);
       assert.equal(change, expectedChangeResult);
+      assert.equal(change, 0.50);
     });
   });
 });

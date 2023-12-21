@@ -40,9 +40,9 @@ const makePurchase = (vendMachine, item, money) => {
       if (money >= totalCost){
         // decrement the inventory quantity by selected quantity
         existItem.quantity -= item.quantity;
-        // collectChange(totalCost, money);
+        const change = collectChange(totalCost, money)
         // return a success message
-        return `Here are your ${item.name}`;
+        return `Delievered: ${item.name}, quantity: ${item.quantity}. Your change is: ${change}`;
       } else {
         return `Please insert more money, you need at least ${totalCost}`;
       }
@@ -55,9 +55,9 @@ const makePurchase = (vendMachine, item, money) => {
 }
 
 const collectChange = (cost, money) => {
-  const change = money - cost;
+  const change = (money - cost).toFixed(2);
 
-  return `Your change equals: ${change.toFixed(2)}`;
+  return change
 }
 
 module.exports = {
