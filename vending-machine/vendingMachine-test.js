@@ -1,118 +1,178 @@
-var assert = require('chai').assert
-var { createItemStock, collectChange, makePurchase } = require('./vendingMachine')
+const assert = require('chai').assert;
+const {createVendingMachine, createItemStock, addStock, makePurchase, collectChange } = require('./vendingMachine');
 
-describe('vending machine functions', function() {
-  describe('createItemStock', function() {
-    it.skip('can collect the details of a stocked item', function() {
-      var name = 'chips'
-      var quantity = 10
-      var price = 1.25
+describe('VendingMachine', function () {
+  describe('createVendingMachine', function () {
+    it('should start out as an empty vending machine', function () {
+      var vendMach = createVendingMachine();
+      assert.deepEqual(vendMach.inventory, []);
+    });
+  });
 
-      var expectedResult = { 
+  describe('createItemStock', function () {
+    it('should collect details of a stocked item', function () {
+      const item = createItemStock('chips', 12, 1.75);
+      const expectedResult = {
         name: 'chips',
-        quantity: 10,
-        price: 1.25,
+        quantity: 12,
+        price: 1.75
       }
-      var itemStock = createItemStock(name, quantity, price)
 
-      assert.deepEqual(itemStock, expectedResult)
+      assert.deepEqual(item, expectedResult);
+    });
+
+    it('should return defaults if nothing is passed', function () {
+      const item = createItemStock();
+      const expectedResult = {
+        name: "unknown",
+        quantity: 0,
+        price: 1.00,
+      };
+
+      assert.deepEqual(item, expectedResult);
     })
+  });
 
-    it.skip('should return an item with defaults if nothing is passed', function() {
-      var expectedResult = { 
-        name: 'unknown', 
-        quantity: 0, 
-        price: 1.00 
-      }
-      var itemStock = createItemStock()
+  describe('addSock', function () {
+    it('should add the item object to the inventory array', function () {
+      var vendMach = createVendingMachine();
+      assert.deepEqual(vendMach.inventory, []);
+      assert.equal(vendMach.inventory.length, 0);
 
-      assert.deepEqual(itemStock, expectedResult)
-    })
-  })
+      const item = createItemStock('chips', 12, 1.75);
+      addStock(item, vendMach);
 
-  describe('makePurchase', function() {
-    it.skip('does not allow a purchase if given less than price', function() {
-      var selectedItem = createItemStock('chips', 2, 2.00)
-      var moneyForPurchase = 0.35
-      var expectedResult = 'Sorry, you need at least $2 to make that purchase'
+      assert.deepEqual(vendMach.inventory, [item]);
+      assert.equal(vendMach.inventory.length, 1);
+    });
 
-      var transactionResult = makePurchase(selectedItem, moneyForPurchase)
+    it('should not add duplicates of items, only add quantity if item already exists', function () {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 12, 1.75);
+      addStock(item, vendMach);
+      assert.deepEqual(vendMach.inventory, [item]);
 
-      assert.equal(transactionResult, expectedResult)
-    })
+      const stockedItem = vendMach.inventory.find(obj => obj.name === item.name);
+      assert.equal(stockedItem.quantity, 12);
 
-    it.skip('does not allow a purchase if given less than different price', function() {
-      var selectedItem = createItemStock('soda', 2, 1.00)
-      var moneyForPurchase = 0.35
-      var expectedResult = 'Sorry, you need at least $1 to make that purchase'
+      const item2 = createItemStock('chips', 3, 1.75);
+      addStock(item2, vendMach);
+      assert.deepEqual(vendMach.inventory, [item]);
+      assert.equal(stockedItem.quantity, 15);
+    });
+  });
 
-      var transactionResult = makePurchase(selectedItem, moneyForPurchase)
+  describe('makePurchase', function () {
+    it('should not allow purchase if item doesnot exist', function () {
+      var vendMach = createVendingMachine();
+      const selectedItem = {name: 'chips', quantity: 1}
+      const moneyForPurchase = 0.35;
+      const expectedResult = 'Invalid selection';
+      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase)
 
-      assert.equal(transactionResult, expectedResult)
-    })
+      assert.equal(transaction, expectedResult);
+    });
 
-    it.skip('does not allow a purchase if no items of that type are available', function() {
-      var selectedItem = createItemStock('chips', 0, 2.00)
-      var moneyForPurchase = 2.00
-      var expectedResult = 'Sorry, there are none left'
+    it('should not allow purchase if quantity selected is more than available', () => {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 2, 1.75);
+      addStock(item, vendMach);
+      const selectedItem = {name: 'chips', quantity: 4}
+      const moneyForPurchase = 0.35;
+      const expectedResult = `sorry, that quantity is not available. ${item.name} has ${item.quantity} in stock`;
+      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase)
 
-      var transactionResult = makePurchase(selectedItem, moneyForPurchase)
+      assert.equal(transaction, expectedResult);
+    });
 
-      assert.equal(transactionResult, expectedResult)
-    })
+    it('should not allow purchase if given less than price', function () {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 12, 1.75);
+      addStock(item, vendMach);
 
-    it.skip('allows the transaction if successful', function() {
-      var selectedItem = createItemStock('chips', 1, 2.00)
-      var moneyForPurchase = 2.00
-      var expectedResult = 'Here are your chips'
+      const selectedItem = {name: 'chips', quantity: 2}
+      const moneyForPurchase = 0.35;
 
-      var transactionResult = makePurchase(selectedItem, moneyForPurchase)
+      const expectedResult = `Please insert more money, you need at least ${(item.price * selectedItem.quantity)}`;
 
-      assert.equal(transactionResult, expectedResult)
+      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase)
+      assert.equal(transaction, expectedResult);
+    });
 
-      assert.deepEqual(transactionResult, expectedResult)
-    })
+    it('allows the transaction if successful', () => {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 12, 1.75);
+      addStock(item, vendMach);
+      const selectedItem = {name: 'chips', quantity: 2}
+      const moneyForPurchase = 3.75;
+      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase);
+      const expectedResult = `Here are your ${selectedItem.name}`;
 
-    it.skip('allows a different transaction if successful', function() {
-      var selectedItem = createItemStock('skittles', 1, 1.00)
-      var moneyForPurchase = 1.00
-      var expectedResult = 'Here are your skittles'
+      assert.equal(transaction, expectedResult);
+    });
 
-      var transactionResult = makePurchase(selectedItem, moneyForPurchase)
+    it('should decrement the available quantity in vendingMachine by selected quantity after transaction', () => {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 12, 1.75);
+      addStock(item, vendMach);
 
-      assert.equal(transactionResult, expectedResult)
+      const stockedItem = vendMach.inventory.find(obj => obj.name === item.name);
+      assert.equal(stockedItem.quantity, 12);
 
-      assert.deepEqual(transactionResult, expectedResult)
-    })
-  })
+      const selectedItem = {name: 'chips', quantity: 2}
+      const moneyForPurchase = 4.00;
+      makePurchase(vendMach, selectedItem, moneyForPurchase);
 
-  describe('collectChange', function() {
-    it.skip('can calculate the total of a single coin', function() {
-      var looseChange = [0.25]
-      var expectedTotal = 0.25
+      assert.equal(stockedItem.quantity, 10);
+    });
 
-      var total = collectChange(looseChange)
+    it('allows another successful transaction and decrement', () => {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 12, 1.75);
+      const item2 = createItemStock('skittles', 3, 1.00);
+      const item3 = createItemStock('apple', 8, 0.50);
+      addStock(item, vendMach);
+      addStock(item2, vendMach);
+      addStock(item3, vendMach);
 
-      assert.deepEqual(total, expectedTotal)
-    })
+      const selectedItem = {name: 'skittles', quantity: 1}
+      const moneyForPurchase = 1.00;
 
-    it.skip('can calculate the total of two coins', function() {
-      var looseChange = [0.25, 0.10]
-      var expectedTotal = 0.35
+      const stockedItem = vendMach.inventory.find(obj => obj.name === selectedItem.name);
+      assert.equal(stockedItem.quantity, 3);
 
-      var total = collectChange(looseChange)
+      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase);
+      const expectedResult = `Here are your ${selectedItem.name}`;
 
-      assert.deepEqual(total, expectedTotal)
-    })
+      assert.equal(stockedItem.quantity, 2);
+      assert.equal(transaction, expectedResult);
+    });
+  });
 
-    it.skip('can calculate the total of many coins', function() {
-      var looseChange = [0.25, 0.10, 0.25, 0.05, 1.00]
-      var expectedTotal = 1.65
+  describe('collectChange', function () {
+    it('should deliver change', () => {
+      var vendMach = createVendingMachine();
+      const item = createItemStock('chips', 12, 1.75);
+      const item2 = createItemStock('skittles', 3, 1.00);
+      const item3 = createItemStock('apple', 8, 0.50);
+      addStock(item, vendMach);
+      addStock(item2, vendMach);
+      addStock(item3, vendMach);
 
-      var total = collectChange(looseChange)
+      const selectedItem = {name: 'apple', quantity: 1}
+      const moneyForPurchase = 1.00;
 
-      assert.deepEqual(total, expectedTotal)
-    })
-  })
+      const stockedItem = vendMach.inventory.find(obj => obj.name === selectedItem.name);
+      const totalCost = stockedItem.price * selectedItem.quantity;
 
-})
+      const transaction = makePurchase(vendMach, selectedItem, moneyForPurchase);
+      const change = collectChange(totalCost, moneyForPurchase);
+
+      const expectedTransResult = `Here are your ${selectedItem.name}`;
+      const expectedChangeResult = `Your change equals: ${(moneyForPurchase - totalCost).toFixed(2)}`;
+
+      assert.equal(transaction, expectedTransResult);
+      assert.equal(change, expectedChangeResult);
+    });
+  });
+});
